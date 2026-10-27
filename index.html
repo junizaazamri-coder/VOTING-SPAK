@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo — Sistem Voting Anugerah PA PTSS 2025</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+:root { --biru:#003087; --emas:#C9A84C; }
+body  { font-family:'Segoe UI',sans-serif; background:#f5f7fa; }
+
+/* SCREEN SYSTEM */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* NAVBAR */
+#topNav { background:var(--biru); display:none; }
+#topNav .navbar-brand { color:var(--emas)!important; font-weight:700; }
+
+/* BUTTON */
+.btn-ptss { background:var(--biru); color:#fff; border:none; }
+.btn-ptss:hover { background:#002060; color:#fff; }
+
+/* LOGIN */
+.card-login { max-width:440px; margin:56px auto; border-radius:14px; }
+
+/* HERO */
+.hero {
+  background:linear-gradient(135deg,var(--biru) 0%,#1a4a9c 100%);
+  color:#fff; padding:1.8rem 2rem; border-radius:14px; margin-bottom:1.5rem;
+}
+
+/* KATEGORI CARD */
+.card-k { border-left:4px solid var(--biru); transition:transform .2s,box-shadow .2s; }
+.card-k:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,.1); }
+
+/* PA AVATAR */
+.pa-av { width:44px;height:44px;border-radius:50%;background:var(--biru);color:#fff;
+         display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0; }
+
+/* ADMIN LAYOUT */
+.adm-wrap  { display:flex; min-height:100vh; }
+.adm-side  { width:215px;flex-shrink:0;background:var(--biru);color:#fff;min-height:100vh; }
+.adm-brand { padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.12);font-weight:700;color:var(--emas);font-size:.95rem; }
+.adm-side .nav-link { color:rgba(255,255,255,.8);padding:.6rem 1.5rem;font-size:.9rem; }
+.adm-side .nav-link:hover,.adm-side .nav-link.active { background:rgba(255,255,255,.13);color:#fff; }
+.adm-body  { flex:1;padding:2rem;background:#f5f7fa; }
+.stat-card { border-left:4px solid var(--biru); }
+
+/* SIJIL */
+.sijil-outer { border:10px solid var(--biru);border-radius:8px;max-width:700px;margin:0 auto;background:#fff;padding:28px 40px; }
+.sijil-inner { border:2px solid var(--emas);border-radius:4px;padding:24px 32px;text-align:center; }
+
+/* TOAST */
+.toast-container { position:fixed;bottom:22px;right:22px;z-index:9999; }
+.toast-msg {
+  background:var(--biru);color:#fff;padding:13px 18px;border-radius:10px;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);display:flex;align-items:center;gap:10px;
+  animation:tslide .3s ease;min-width:270px;margin-top:8px;
+}
+@keyframes tslide{from{transform:translateX(110px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* PROGRESS */
+.progress{height:10px;}
+.nav-pills .nav-link.active{background:var(--biru);}
+.nav-pills .nav-link{color:var(--biru);}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ TOP NAV (pelajar sahaja) ═══════════════ -->
+<nav class="navbar navbar-dark mb-0" id="topNav">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand"><i class="bi bi-award-fill me-2"></i>Anugerah PA PTSS</span>
+    <div class="d-flex align-items-center gap-3">
+      <span class="text-white small" id="navUser"></span>
+      <a href="#" class="btn btn-outline-light btn-sm" onclick="goScreen('login')">
+        <i class="bi bi-box-arrow-right me-1"></i>Log Keluar
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 1 — LOGIN
+══════════════════════════════════════════════════════════════ -->
+<div id="s-login" class="screen active">
+<div class="container">
+  <div class="card card-login shadow border-0">
+    <div class="card-body p-5">
+      <div class="text-center mb-4">
+        <i class="bi bi-award-fill" style="font-size:3rem;color:var(--biru);"></i>
+        <h4 class="fw-bold mt-2">Anugerah PA PTSS 2025</h4>
+        <p class="text-muted small">Log masuk menggunakan No. Matrik anda</p>
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">No. Matrik</label>
+        <input id="inMatrik" type="text" class="form-control form-control-lg" value="A230001" placeholder="Contoh: A230001">
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Kata Laluan</label>
+        <input type="password" class="form-control form-control-lg" value="••••••">
+      </div>
+      <div class="d-grid mb-3">
+        <button class="btn btn-ptss btn-lg" onclick="doLogin()">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Log Masuk & Undi
+        </button>
+      </div>
+      <hr>
+      <p class="text-center text-muted small mb-1">
+        Belum ada akaun? <a href="#" onclick="goScreen('register')" class="fw-semibold text-decoration-none">Daftar di sini</a>
+      </p>
+      <p class="text-center text-muted small mb-0">
+        Penyelaras / Admin? <a href="#" onclick="goScreen('adm-dashboard')" class="text-decoration-none">Admin Panel</a>
+      </p>
+    </div>
+  </div>
+  <p class="text-center text-muted small mt-3">Sesi: Anugerah PA PTSS 2025 &bull; 1 Jun — 30 Jun 2025</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 2 — DAFTAR
+══════════════════════════════════════════════════════════════ -->
+<div id="s-register" class="screen">
+<div class="container py-4">
+  <div class="card shadow border-0 p-4" style="max-width:560px;margin:0 auto;">
+    <div class="d-flex align-items-center mb-4">
+      <button class="btn btn-outline-secondary btn-sm me-3" onclick="goScreen('login')"><i class="bi bi-arrow-left"></i></button>
+      <div><h5 class="fw-bold mb-0">Daftar Akaun Pelajar</h5><small class="text-muted">Anugerah PA PTSS 2025</small></div>
+    </div>
+    <div class="row g-3">
+      <div class="col-6">
+        <label class="form-label fw-semibold">No. Matrik <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" value="A230010" placeholder="A230001">
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+        <select class="form-select"><option>Pelajar Aktif</option><option>Pelajar WBL</option></select>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold">Nama Penuh <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" value="Siti Aminah bt Yusof">
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold">E-mel <span class="text-danger">*</span></label>
+        <input type="email" class="form-control" value="a230010@student.ptss.edu.my">
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold">Jabatan <span class="text-danger">*</span></label>
+        <select class="form-select">
+          <option>JTMK — Jabatan Teknologi Maklumat</option>
+          <option>JRKV</option><option>JP</option><option>JPH</option>
+          <option>JKE</option><option>JKM</option><option>ASASI</option>
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold">Program <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" value="Diploma Teknologi Maklumat">
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold">Kata Laluan <span class="text-danger">*</span></label>
+        <input type="password" class="form-control" value="••••••">
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-semibold">Sahkan Kata Laluan <span class="text-danger">*</span></label>
+        <input type="password" class="form-control" value="••••••">
+      </div>
+    </div>
+    <div class="d-grid mt-4">
+      <button class="btn btn-ptss btn-lg" onclick="doRegister()">
+        <i class="bi bi-person-check-fill me-2"></i>Daftar & Mula Mengundi
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 3 — PILIH KATEGORI
+══════════════════════════════════════════════════════════════ -->
+<div id="s-voting" class="screen">
+<div class="container py-4">
+  <div class="hero">
+    <h4 class="fw-bold mb-1"><i class="bi bi-trophy-fill me-2"></i>Anugerah Penasihat Akademik PTSS 2025</h4>
+    <p class="mb-0 opacity-75">Pilih PA terbaik anda bagi setiap kategori anugerah</p>
+    <small class="opacity-50">Sesi aktif: 1 Jun 2025 — 30 Jun 2025 &bull; Baki masa: <span id="countdown"></span></small>
+  </div>
+  <div class="alert alert-info mb-4">
+    <i class="bi bi-info-circle-fill me-2"></i>
+    Anda boleh memilih <strong>sehingga 2 calon PA</strong> bagi setiap kategori.
+    PA boleh dipilih dari <strong>mana-mana jabatan</strong>.
+    Undi adalah <strong>sulit &amp; tidak boleh diubah</strong>.
+  </div>
+  <div class="row g-4" id="gridKategori"></div>
+  <div class="text-center mt-4">
+    <button class="btn btn-outline-secondary" onclick="goScreen('status')">
+      <i class="bi bi-list-check me-1"></i>Lihat Semua Status Undi Saya
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 4 — SENARAI PA (1 KATEGORI)
+══════════════════════════════════════════════════════════════ -->
+<div id="s-pilih-pa" class="screen">
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-3">
+    <button class="btn btn-outline-secondary btn-sm me-3" onclick="goScreen('voting')"><i class="bi bi-arrow-left"></i></button>
+    <div class="flex-grow-1">
+      <h5 class="fw-bold mb-0" id="kNama"></h5>
+      <small class="text-muted" id="kDesc"></small>
+    </div>
+    <span class="badge fs-6 ms-2" id="kBaki" style="background:var(--emas);color:#000;"></span>
+  </div>
+  <div class="alert alert-warning py-2 small mb-3">
+    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+    Pilih sehingga <strong>2 orang PA</strong> dari mana-mana jabatan. Klik <strong>"Undi"</strong> untuk memilih.
+  </div>
+  <div id="paJabatan"></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 5 — STATUS UNDI
+══════════════════════════════════════════════════════════════ -->
+<div id="s-status" class="screen">
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4">
+    <button class="btn btn-outline-secondary btn-sm me-3" onclick="goScreen('voting')"><i class="bi bi-arrow-left"></i></button>
+    <h5 class="fw-bold mb-0"><i class="bi bi-list-check me-2"></i>Status Undi Saya</h5>
+  </div>
+  <div class="row g-4" id="gridStatus"></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 6 — ADMIN DASHBOARD
+══════════════════════════════════════════════════════════════ -->
+<div id="s-adm-dashboard" class="screen">
+<div class="adm-wrap">
+  <div class="adm-side">
+    <div class="adm-brand"><i class="bi bi-shield-lock-fill me-2"></i>Admin Panel</div>
+    <nav class="nav flex-column mt-2">
+      <a href="#" class="nav-link active" onclick="goScreen('adm-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-pa')"><i class="bi bi-people-fill me-2"></i>Urus PA</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-sesi')"><i class="bi bi-calendar-event me-2"></i>Sesi Voting</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-keputusan')"><i class="bi bi-trophy-fill me-2"></i>Keputusan</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-sijil')"><i class="bi bi-award-fill me-2"></i>Sijil</a>
+      <hr style="border-color:rgba(255,255,255,.2);margin:8px 16px;">
+      <a href="#" class="nav-link" style="color:#f87171;" onclick="goScreen('login')"><i class="bi bi-box-arrow-right me-2"></i>Log Keluar</a>
+    </nav>
+  </div>
+  <div class="adm-body">
+    <h4 class="fw-bold mb-4"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h4>
+    <div class="alert alert-success mb-4">
+      <i class="bi bi-calendar-check me-2"></i>
+      <strong>Sesi Aktif:</strong> Anugerah PA PTSS 2025 &bull; 1/6/2025 — 30/6/2025
+      <span class="badge bg-success ms-2">Sedang Berlangsung</span>
+    </div>
+    <div class="row g-4 mb-4">
+      <div class="col-6 col-md-3"><div class="card stat-card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Jumlah PA</div><div class="fs-2 fw-bold text-primary">42</div><div class="text-muted small">7 jabatan</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="card stat-card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Pelajar Layak</div><div class="fs-2 fw-bold text-success">1,248</div><div class="text-muted small">Aktif + WBL</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="card stat-card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Jumlah Undi</div><div class="fs-2 fw-bold text-warning">3,892</div><div class="text-muted small">Sesi semasa</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="card stat-card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Sudah Undi</div><div class="fs-2 fw-bold text-info">876</div><div class="text-muted small">Belum: 372</div></div></div></div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6"><div class="card border-0 shadow-sm"><div class="card-header bg-white fw-bold small"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Undi Per Kategori</div><div class="card-body"><canvas id="cKategori" height="210"></canvas></div></div></div>
+      <div class="col-md-3"><div class="card border-0 shadow-sm"><div class="card-header bg-white fw-bold small"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Penyertaan</div><div class="card-body d-flex flex-column align-items-center justify-content-center"><canvas id="cPenyertaan" height="190"></canvas><div class="mt-2 text-center" style="font-size:.78rem;color:#666;"><span class="fw-bold text-success">876</span> sudah &nbsp;|&nbsp; <span class="fw-bold text-secondary">372</span> belum</div></div></div></div>
+      <div class="col-md-3"><div class="card border-0 shadow-sm"><div class="card-header bg-white fw-bold small"><i class="bi bi-building me-2 text-warning"></i>Per Jabatan</div><div class="card-body"><canvas id="cJabatan" height="210"></canvas></div></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 7 — ADMIN URUS PA
+══════════════════════════════════════════════════════════════ -->
+<div id="s-adm-pa" class="screen">
+<div class="adm-wrap">
+  <div class="adm-side">
+    <div class="adm-brand"><i class="bi bi-shield-lock-fill me-2"></i>Admin Panel</div>
+    <nav class="nav flex-column mt-2">
+      <a href="#" class="nav-link" onclick="goScreen('adm-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="#" class="nav-link active"><i class="bi bi-people-fill me-2"></i>Urus PA</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-sesi')"><i class="bi bi-calendar-event me-2"></i>Sesi Voting</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-keputusan')"><i class="bi bi-trophy-fill me-2"></i>Keputusan</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-sijil')"><i class="bi bi-award-fill me-2"></i>Sijil</a>
+      <hr style="border-color:rgba(255,255,255,.2);margin:8px 16px;">
+      <a href="#" class="nav-link" style="color:#f87171;" onclick="goScreen('login')"><i class="bi bi-box-arrow-right me-2"></i>Log Keluar</a>
+    </nav>
+  </div>
+  <div class="adm-body">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold mb-0"><i class="bi bi-people-fill me-2"></i>Senarai Penasihat Akademik</h4>
+      <button class="btn btn-primary btn-sm" onclick="toast('Form tambah PA akan dibuka','person-plus-fill')">
+        <i class="bi bi-person-plus-fill me-1"></i>Tambah PA
+      </button>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>#</th><th>Nama PA</th><th>No. Pekerja</th><th>Jabatan</th><th class="text-center">Status</th><th class="text-center">Tindakan</th></tr></thead>
+          <tbody id="tblPA"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 8 — ADMIN SESI VOTING
+══════════════════════════════════════════════════════════════ -->
+<div id="s-adm-sesi" class="screen">
+<div class="adm-wrap">
+  <div class="adm-side">
+    <div class="adm-brand"><i class="bi bi-shield-lock-fill me-2"></i>Admin Panel</div>
+    <nav class="nav flex-column mt-2">
+      <a href="#" class="nav-link" onclick="goScreen('adm-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-pa')"><i class="bi bi-people-fill me-2"></i>Urus PA</a>
+      <a href="#" class="nav-link active"><i class="bi bi-calendar-event me-2"></i>Sesi Voting</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-keputusan')"><i class="bi bi-trophy-fill me-2"></i>Keputusan</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-sijil')"><i class="bi bi-award-fill me-2"></i>Sijil</a>
+      <hr style="border-color:rgba(255,255,255,.2);margin:8px 16px;">
+      <a href="#" class="nav-link" style="color:#f87171;" onclick="goScreen('login')"><i class="bi bi-box-arrow-right me-2"></i>Log Keluar</a>
+    </nav>
+  </div>
+  <div class="adm-body">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold mb-0"><i class="bi bi-calendar-event me-2"></i>Sesi Voting</h4>
+      <button class="btn btn-primary btn-sm" onclick="toast('Form cipta sesi baru dibuka','calendar-plus')">
+        <i class="bi bi-calendar-plus me-1"></i>Cipta Sesi Baharu
+      </button>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light"><tr><th>Nama Sesi</th><th>Tahun</th><th>Tarikh Mula</th><th>Tarikh Tamat</th><th class="text-center">Status</th><th class="text-center">Tindakan</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="fw-semibold">Anugerah PA PTSS 2025</td><td>2025</td>
+              <td>01/06/2025 08:00</td><td>30/06/2025 23:59</td>
+              <td class="text-center"><span class="badge bg-success">Berlangsung</span></td>
+              <td class="text-center"><button class="btn btn-outline-primary btn-sm" onclick="toast('Form edit sesi dibuka','pencil')"><i class="bi bi-pencil"></i></button></td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">Anugerah PA PTSS 2024</td><td>2024</td>
+              <td>01/06/2024 08:00</td><td>30/06/2024 23:59</td>
+              <td class="text-center"><span class="badge bg-secondary">Tidak Aktif</span></td>
+              <td class="text-center"><button class="btn btn-outline-primary btn-sm" onclick="toast('Form edit sesi dibuka','pencil')"><i class="bi bi-pencil"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Form sesi baharu (mock) -->
+    <div class="card border-0 shadow-sm" style="max-width:500px;">
+      <div class="card-header bg-white fw-bold"><i class="bi bi-plus-circle me-2"></i>Tetapan Sesi</div>
+      <div class="card-body">
+        <div class="mb-3"><label class="form-label fw-semibold">Nama Sesi</label><input type="text" class="form-control" value="Anugerah PA PTSS 2025"></div>
+        <div class="row g-3 mb-3">
+          <div class="col-6"><label class="form-label fw-semibold">Tarikh Mula</label><input type="datetime-local" class="form-control" value="2025-06-01T08:00"></div>
+          <div class="col-6"><label class="form-label fw-semibold">Tarikh Tamat</label><input type="datetime-local" class="form-control" value="2025-06-30T23:59"></div>
+        </div>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" checked>
+          <label class="form-check-label fw-semibold">Aktifkan Sesi</label>
+        </div>
+        <button class="btn btn-ptss" onclick="toast('Sesi berjaya dikemaskini!','calendar-check')"><i class="bi bi-save me-2"></i>Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 9 — ADMIN KEPUTUSAN
+══════════════════════════════════════════════════════════════ -->
+<div id="s-adm-keputusan" class="screen">
+<div class="adm-wrap">
+  <div class="adm-side">
+    <div class="adm-brand"><i class="bi bi-shield-lock-fill me-2"></i>Admin Panel</div>
+    <nav class="nav flex-column mt-2">
+      <a href="#" class="nav-link" onclick="goScreen('adm-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-pa')"><i class="bi bi-people-fill me-2"></i>Urus PA</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-sesi')"><i class="bi bi-calendar-event me-2"></i>Sesi Voting</a>
+      <a href="#" class="nav-link active"><i class="bi bi-trophy-fill me-2"></i>Keputusan</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-sijil')"><i class="bi bi-award-fill me-2"></i>Sijil</a>
+      <hr style="border-color:rgba(255,255,255,.2);margin:8px 16px;">
+      <a href="#" class="nav-link" style="color:#f87171;" onclick="goScreen('login')"><i class="bi bi-box-arrow-right me-2"></i>Log Keluar</a>
+    </nav>
+  </div>
+  <div class="adm-body">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <h4 class="fw-bold mb-0"><i class="bi bi-trophy-fill me-2 text-warning"></i>Keputusan Undi</h4>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-warning btn-sm" onclick="toast('Pemenang berjaya diumumkan! 28 slot keputusan disimpan.','megaphone-fill')">
+          <i class="bi bi-megaphone-fill me-1"></i>Umumkan Pemenang
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="toast('Laporan PDF sedang dijana...','file-earmark-pdf-fill')">
+          <i class="bi bi-file-earmark-pdf-fill me-1"></i>Laporan PDF
+        </button>
+        <button class="btn btn-success btn-sm" onclick="goScreen('adm-sijil')">
+          <i class="bi bi-award-fill me-1"></i>Semua Sijil PDF
+        </button>
+      </div>
+    </div>
+    <ul class="nav nav-pills mb-4 flex-wrap gap-1" id="tabJab"></ul>
+    <div id="divKeputusan"></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SKRIN 10 — ADMIN SIJIL PREVIEW
+══════════════════════════════════════════════════════════════ -->
+<div id="s-adm-sijil" class="screen">
+<div class="adm-wrap">
+  <div class="adm-side">
+    <div class="adm-brand"><i class="bi bi-shield-lock-fill me-2"></i>Admin Panel</div>
+    <nav class="nav flex-column mt-2">
+      <a href="#" class="nav-link" onclick="goScreen('adm-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-pa')"><i class="bi bi-people-fill me-2"></i>Urus PA</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-sesi')"><i class="bi bi-calendar-event me-2"></i>Sesi Voting</a>
+      <a href="#" class="nav-link" onclick="goScreen('adm-keputusan')"><i class="bi bi-trophy-fill me-2"></i>Keputusan</a>
+      <a href="#" class="nav-link active"><i class="bi bi-award-fill me-2"></i>Sijil</a>
+      <hr style="border-color:rgba(255,255,255,.2);margin:8px 16px;">
+      <a href="#" class="nav-link" style="color:#f87171;" onclick="goScreen('login')"><i class="bi bi-box-arrow-right me-2"></i>Log Keluar</a>
+    </nav>
+  </div>
+  <div class="adm-body">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <h4 class="fw-bold mb-0"><i class="bi bi-award-fill me-2 text-warning"></i>Pratonton Sijil Pemenang</h4>
+      <button class="btn btn-success" onclick="toast('28 sijil sedang dijana sebagai PDF...','award-fill')">
+        <i class="bi bi-download me-1"></i>Muat Turun Semua Sijil (PDF)
+      </button>
+    </div>
+    <div class="d-flex gap-2 mb-4 flex-wrap align-items-center">
+      <select class="form-select" style="max-width:380px;" id="selPemenang" onchange="renderSijil(this.value)">
+        <option value="0">En. Faizal bin Othman — PA Paling Prihatin (JTMK)</option>
+        <option value="1">Pn. Azlina bt Ahmad — PA Paling Berdedikasi (JRKV)</option>
+        <option value="2">En. Shahrul bin Nizam — PA Paling Inovatif (JKE)</option>
+        <option value="3">Pn. Hasnah bt Karim — PA Pilihan Pelajar (JPH)</option>
+        <option value="4">En. Zamri bin Salleh — PA Paling Prihatin (JKM)</option>
+        <option value="5">Pn. Siti Nor bt Ismail — PA Pilihan Pelajar (JP)</option>
+      </select>
+      <button class="btn btn-danger btn-sm" onclick="toast('Sijil ini sedang dijana sebagai PDF...','file-earmark-pdf-fill')">
+        <i class="bi bi-file-earmark-pdf-fill me-1"></i>Jana PDF Sijil Ini
+      </button>
+    </div>
+    <div id="divSijil"></div>
+  </div>
+</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="tc"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+/* ════════════════════════════════════
+   DATA
+════════════════════════════════════ */
+const JAB = [
+  {id:1,kod:'JRKV', nama:'Jabatan Reka Bentuk & Komunikasi Visual'},
+  {id:2,kod:'JTMK', nama:'Jabatan Teknologi Maklumat & Komunikasi'},
+  {id:3,kod:'JP',   nama:'Jabatan Perdagangan'},
+  {id:4,kod:'JPH',  nama:'Jabatan Pelancongan & Hospitaliti'},
+  {id:5,kod:'JKE',  nama:'Jabatan Kejuruteraan Elektrik'},
+  {id:6,kod:'JKM',  nama:'Jabatan Kejuruteraan Mekanikal'},
+  {id:7,kod:'ASASI',nama:'Pusat Asasi'},
+];
+const KAT = [
+  {id:1,nama:'PA Paling Prihatin',    desc:'Responsif & peka kepada isu pelajar'},
+  {id:2,nama:'PA Paling Berdedikasi', desc:'Komitmen masa & usaha'},
+  {id:3,nama:'PA Paling Inovatif',    desc:'Kaedah penasihatan kreatif'},
+  {id:4,nama:'PA Pilihan Pelajar',    desc:'Popular vote umum'},
+];
+const PA = [
+  {id:1, j:1, no:'JRKV001', nama:'Pn. Azlina bt Ahmad'},
+  {id:2, j:1, no:'JRKV002', nama:'En. Hafiz bin Razali'},
+  {id:3, j:2, no:'JTMK001', nama:'En. Faizal bin Othman'},
+  {id:4, j:2, no:'JTMK002', nama:'Pn. Norhasliza bt Yusof'},
+  {id:5, j:3, no:'JP001',   nama:'En. Rizal bin Hassan'},
+  {id:6, j:3, no:'JP002',   nama:'Pn. Siti Nor bt Ismail'},
+  {id:7, j:4, no:'JPH001',  nama:'En. Amirul bin Zainudin'},
+  {id:8, j:4, no:'JPH002',  nama:'Pn. Hasnah bt Karim'},
+  {id:9, j:5, no:'JKE001',  nama:'En. Shahrul bin Nizam'},
+  {id:10,j:5, no:'JKE002',  nama:'Pn. Roslinda bt Daud'},
+  {id:11,j:6, no:'JKM001',  nama:'En. Zamri bin Salleh'},
+  {id:12,j:6, no:'JKM002',  nama:'Pn. Nurul Ain bt Mohd'},
+  {id:13,j:7, no:'ASASI001',nama:'En. Khairul bin Anuar'},
+  {id:14,j:7, no:'ASASI002',nama:'Pn. Mazlinda bt Hamid'},
+];
+const SIJIL_DATA = [
+  {pa:'En. Faizal bin Othman',   no:'JTMK001', kat:'PA Paling Prihatin',    jab:'Jabatan Teknologi Maklumat & Komunikasi', undi:312},
+  {pa:'Pn. Azlina bt Ahmad',     no:'JRKV001', kat:'PA Paling Berdedikasi', jab:'Jabatan Reka Bentuk & Komunikasi Visual', undi:289},
+  {pa:'En. Shahrul bin Nizam',   no:'JKE001',  kat:'PA Paling Inovatif',    jab:'Jabatan Kejuruteraan Elektrik',           undi:274},
+  {pa:'Pn. Hasnah bt Karim',     no:'JPH002',  kat:'PA Pilihan Pelajar',    jab:'Jabatan Pelancongan & Hospitaliti',       undi:356},
+  {pa:'En. Zamri bin Salleh',    no:'JKM001',  kat:'PA Paling Prihatin',    jab:'Jabatan Kejuruteraan Mekanikal',          undi:241},
+  {pa:'Pn. Siti Nor bt Ismail',  no:'JP002',   kat:'PA Pilihan Pelajar',    jab:'Jabatan Perdagangan',                    undi:298},
+];
+const RANK = {
+  1:{1:[{n:'Pn. Azlina bt Ahmad',u:289},{n:'En. Hafiz bin Razali',u:201}],
+     2:[{n:'Pn. Azlina bt Ahmad',u:245},{n:'En. Hafiz bin Razali',u:189}],
+     3:[{n:'En. Hafiz bin Razali',u:178},{n:'Pn. Azlina bt Ahmad',u:145}],
+     4:[{n:'Pn. Azlina bt Ahmad',u:312},{n:'En. Hafiz bin Razali',u:267}]},
+  2:{1:[{n:'En. Faizal bin Othman',u:312},{n:'Pn. Norhasliza bt Yusof',u:245}],
+     2:[{n:'Pn. Norhasliza bt Yusof',u:289},{n:'En. Faizal bin Othman',u:234}],
+     3:[{n:'En. Faizal bin Othman',u:267},{n:'Pn. Norhasliza bt Yusof',u:198}],
+     4:[{n:'Pn. Norhasliza bt Yusof',u:334},{n:'En. Faizal bin Othman',u:289}]},
+  3:{1:[{n:'En. Rizal bin Hassan',u:198},{n:'Pn. Siti Nor bt Ismail',u:156}],
+     2:[{n:'Pn. Siti Nor bt Ismail',u:212},{n:'En. Rizal bin Hassan',u:178}],
+     3:[{n:'En. Rizal bin Hassan',u:167},{n:'Pn. Siti Nor bt Ismail',u:143}],
+     4:[{n:'Pn. Siti Nor bt Ismail',u:298},{n:'En. Rizal bin Hassan',u:234}]},
+  4:{1:[{n:'En. Amirul bin Zainudin',u:223},{n:'Pn. Hasnah bt Karim',u:189}],
+     2:[{n:'Pn. Hasnah bt Karim',u:245},{n:'En. Amirul bin Zainudin',u:198}],
+     3:[{n:'En. Amirul bin Zainudin',u:178},{n:'Pn. Hasnah bt Karim',u:156}],
+     4:[{n:'Pn. Hasnah bt Karim',u:356},{n:'En. Amirul bin Zainudin',u:289}]},
+};
+
+/* ════════════════════════════════════
+   STATE
+════════════════════════════════════ */
+let undi = {};  // {katId:[paId,...]}
+KAT.forEach(k => undi[k.id] = []);
+let curKat = null;
+let chartsInited = false;
+
+/* ════════════════════════════════════
+   NAVIGASI
+════════════════════════════════════ */
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('s-' + name);
+  if (!el) return;
+  el.classList.add('active');
+
+  const isAdmin  = name.startsWith('adm');
+  const isPublic = name === 'login' || name === 'register';
+  const nav = document.getElementById('topNav');
+  nav.style.display = (!isAdmin && !isPublic) ? 'block' : 'none';
+
+  if (name === 'voting')          renderKategori();
+  if (name === 'status')          renderStatus();
+  if (name === 'adm-dashboard' && !chartsInited) { initCharts(); chartsInited = true; }
+  if (name === 'adm-pa')          renderAdminPA();
+  if (name === 'adm-keputusan')   renderKeputusan();
+  if (name === 'adm-sijil')       renderSijil(0);
+  window.scrollTo(0,0);
+}
+
+/* ════════════════════════════════════
+   LOGIN & REGISTER
+════════════════════════════════════ */
+function doLogin() {
+  const m = document.getElementById('inMatrik').value.trim() || 'Pelajar';
+  document.getElementById('navUser').textContent = m;
+  toast('Log masuk berjaya! Selamat mengundi, ' + m, 'check-circle-fill');
+  setTimeout(() => goScreen('voting'), 500);
+}
+function doRegister() {
+  toast('Pendaftaran berjaya! Selamat datang.','person-check-fill');
+  setTimeout(() => goScreen('voting'), 500);
+}
+
+/* ════════════════════════════════════
+   RENDER KATEGORI GRID
+════════════════════════════════════ */
+const KAT_CLR = ['#003087','#C9A84C','#2d8a4e','#e05c2a'];
+function renderKategori() {
+  const g = document.getElementById('gridKategori');
+  g.innerHTML = KAT.map((k,i) => {
+    const d  = undi[k.id].length;
+    const bk = 2 - d;
+    const ok = bk === 0;
+    const udHTML = undi[k.id].map(pid => {
+      const pa = PA.find(p=>p.id===pid);
+      const jb = JAB.find(j=>j.id===pa.j);
+      return `<div class="d-flex align-items-center mt-1">
+        <i class="bi bi-check-circle-fill text-success me-2 small"></i>
+        <small>${pa.nama} <span class="text-muted">(${jb.kod})</span></small>
+      </div>`;
+    }).join('');
+    return `
+    <div class="col-md-6">
+      <div class="card card-k h-100 shadow-sm border-0">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h5 class="fw-bold mb-1" style="color:${KAT_CLR[i]}">${k.nama}</h5>
+              <p class="text-muted small mb-0">${k.desc}</p>
+            </div>
+            ${ok ? '<span class="badge bg-success"><i class="bi bi-check2"></i> Selesai</span>'
+                 : `<span class="badge" style="background:var(--emas);color:#000;">Baki: ${bk} undi</span>`}
+          </div>
+          ${udHTML}
+          <button class="btn ${ok?'btn-outline-success':'btn-ptss'} w-100 mt-3" onclick="bukakKat(${k.id})">
+            ${ok ? '<i class="bi bi-eye me-1"></i>Lihat Pilihan'
+                 : '<i class="bi bi-hand-index-thumb me-1"></i>Undi Sekarang'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════
+   RENDER SENARAI PA
+════════════════════════════════════ */
+function bukakKat(kId) {
+  curKat = KAT.find(k=>k.id===kId);
+  document.getElementById('kNama').textContent = curKat.nama;
+  document.getElementById('kDesc').textContent = curKat.desc;
+  renderPAList();
+  goScreen('pilih-pa');
+}
+function renderPAList() {
+  const kId = curKat.id;
+  const ud  = undi[kId];
+  const bk  = 2 - ud.length;
+  const bEl = document.getElementById('kBaki');
+  bEl.textContent = bk > 0 ? `Baki ${bk} undi` : 'Undi Selesai';
+  bEl.style.background = bk > 0 ? 'var(--emas)' : '#198754';
+  bEl.style.color = bk > 0 ? '#000' : '#fff';
+
+  document.getElementById('paJabatan').innerHTML = JAB.map(jb => {
+    const list = PA.filter(p=>p.j===jb.id);
+    const rows = list.map(pa => {
+      const done  = ud.includes(pa.id);
+      const limit = !done && bk <= 0;
+      return `<tr class="${done?'table-success':''}">
+        <td>
+          <div class="d-flex align-items-center gap-3">
+            <div class="pa-av"><i class="bi bi-person"></i></div>
+            <span class="fw-semibold">${pa.nama}</span>
+          </div>
+        </td>
+        <td class="text-muted small">${pa.no}</td>
+        <td class="text-center">
+          ${done  ? '<span class="badge bg-success"><i class="bi bi-check2-circle me-1"></i>Telah Diundi</span>'
+          : limit ? '<span class="badge bg-secondary">Had Dicapai</span>'
+          : `<button class="btn btn-ptss btn-sm" onclick="buatUndi(${pa.id})">
+               <i class="bi bi-hand-index-thumb me-1"></i>Undi
+             </button>`}
+        </td>
+      </tr>`;
+    }).join('');
+    return `
+    <div class="card mb-3 border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold border-start border-4 border-primary">
+        <i class="bi bi-building me-2"></i>${jb.nama}
+        <span class="badge bg-light text-dark ms-2">${jb.kod}</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr><th>Nama PA</th><th>No. Pekerja</th><th class="text-center">Tindakan</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+function buatUndi(paId) {
+  const kId = curKat.id;
+  if (undi[kId].length >= 2)         { toast('Had 2 undi dicapai untuk kategori ini.','exclamation-circle-fill'); return; }
+  if (undi[kId].includes(paId))      { toast('Anda sudah mengundi PA ini.','exclamation-circle-fill'); return; }
+  const pa = PA.find(p=>p.id===paId);
+  undi[kId].push(paId);
+  toast(`✅ Undi untuk <strong>${pa.nama}</strong> berjaya! Pengesahan dihantar ke e-mel anda.`,'envelope-check-fill');
+  renderPAList();
+}
+
+/* ════════════════════════════════════
+   RENDER STATUS UNDI
+════════════════════════════════════ */
+function renderStatus() {
+  document.getElementById('gridStatus').innerHTML = KAT.map(k => {
+    const ud = undi[k.id];
+    const bk = 2 - ud.length;
+    const rows = ud.length > 0
+      ? ud.map(pid => {
+          const pa = PA.find(p=>p.id===pid);
+          const jb = JAB.find(j=>j.id===pa.j);
+          return `<div class="d-flex align-items-center p-2 mb-2 bg-light rounded">
+            <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+            <div><div class="fw-semibold">${pa.nama}</div><small class="text-muted">${jb.nama}</small></div>
+          </div>`;
+        }).join('')
+      : `<div class="text-center text-muted py-3"><i class="bi bi-hourglass d-block fs-3 mb-1"></i>Belum mengundi</div>`;
+    return `
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white fw-bold border-start border-4 border-primary">${k.nama}</div>
+        <div class="card-body">
+          ${rows}
+          ${bk > 0
+            ? `<button class="btn btn-ptss btn-sm w-100 mt-2" onclick="bukakKat(${k.id});goScreen('pilih-pa')">
+                <i class="bi bi-plus-circle me-1"></i>Tambah ${bk} Lagi Undi
+               </button>`
+            : '<div class="text-center text-success small mt-1"><i class="bi bi-check2-all me-1"></i>Undi lengkap</div>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════
+   ADMIN — PA TABLE
+════════════════════════════════════ */
+function renderAdminPA() {
+  document.getElementById('tblPA').innerHTML = PA.map((pa,i) => {
+    const jb = JAB.find(j=>j.id===pa.j);
+    return `<tr>
+      <td>${i+1}</td>
+      <td class="fw-semibold">${pa.nama}</td>
+      <td class="text-muted small">${pa.no}</td>
+      <td><span class="badge bg-secondary">${jb.kod}</span></td>
+      <td class="text-center"><span class="badge bg-success">Aktif</span></td>
+      <td class="text-center">
+        <button class="btn btn-outline-primary btn-sm me-1" onclick="toast('Form edit PA dibuka','pencil')"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-outline-danger btn-sm"  onclick="toast('PA dinyahaktifkan','slash-circle')"><i class="bi bi-slash-circle"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════
+   ADMIN — KEPUTUSAN + TAB
+════════════════════════════════════ */
+function renderKeputusan() {
+  document.getElementById('tabJab').innerHTML = JAB.map((j,i) =>
+    `<li class="nav-item">
+       <button class="nav-link ${i===0?'active':''}" onclick="showTab(${j.id},this)">${j.kod}</button>
+     </li>`).join('');
+  showTab(1, document.querySelector('#tabJab .nav-link'));
+}
+function showTab(jId, btn) {
+  document.querySelectorAll('#tabJab .nav-link').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const jb = JAB.find(j=>j.id===jId);
+  const rk = RANK[jId] || {};
+  document.getElementById('divKeputusan').innerHTML = `
+    <p class="fw-bold text-muted mb-3 small">${jb.nama}</p>
+    <div class="row g-4">
+      ${KAT.map(k => {
+        const r = rk[k.id] || [];
+        const rows = r.length
+          ? r.map((x,i) => `<tr class="${i===0?'table-warning fw-bold':''}">
+              <td>${i===0?'🥇':i===1?'🥈':'🥉'}</td>
+              <td>${x.n}</td>
+              <td class="text-end">${x.u}</td>
+              <td class="text-center">
+                ${i===0?`<button class="btn btn-outline-success btn-sm" onclick="goScreen('adm-sijil')"><i class="bi bi-award me-1"></i>Sijil</button>`:''}
+              </td>
+            </tr>`).join('')
+          : `<tr><td colspan="4" class="text-muted text-center py-3 small">Tiada undi</td></tr>`;
+        return `
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-bold small">${k.nama}</div>
+            <div class="card-body p-0">
+              <table class="table table-sm mb-0">
+                <thead class="table-light"><tr><th>#</th><th>Nama PA</th><th class="text-end">Undi</th><th></th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+/* ════════════════════════════════════
+   ADMIN — SIJIL PREVIEW
+════════════════════════════════════ */
+function renderSijil(idx) {
+  idx = parseInt(idx) || 0;
+  const d = SIJIL_DATA[idx] || SIJIL_DATA[0];
+  document.getElementById('divSijil').innerHTML = `
+  <div class="sijil-outer">
+    <div class="sijil-inner">
+      <div style="font-size:.95rem;font-weight:700;color:var(--biru);letter-spacing:1.5px;text-transform:uppercase;">
+        Politeknik Sultan Salahuddin Abdul Aziz Shah
+      </div>
+      <div style="font-size:.78rem;color:#888;letter-spacing:.8px;margin-bottom:10px;">
+        Pusat Penasihatan Akademik &amp; Pembangunan Pelajar (PPAP)
+      </div>
+      <div style="width:150px;height:2px;background:var(--emas);margin:0 auto 14px;"></div>
+      <div style="font-size:2.2rem;margin-bottom:4px;">🏆</div>
+      <div style="font-size:1.8rem;font-weight:800;color:var(--biru);letter-spacing:3px;">SIJIL ANUGERAH</div>
+      <div style="font-size:.8rem;color:#888;letter-spacing:1.2px;margin-bottom:12px;">
+        ANUGERAH PENASIHAT AKADEMIK TERBAIK 2025
+      </div>
+      <div style="width:150px;height:2px;background:var(--emas);margin:0 auto 16px;"></div>
+      <div style="font-size:.88rem;color:#555;margin-bottom:6px;">Dengan sukacitanya dianugerahkan kepada</div>
+      <div style="font-size:1.6rem;font-weight:800;color:var(--biru);
+                  border-bottom:2px solid var(--emas);display:inline-block;
+                  padding:0 32px 5px;margin-bottom:8px;">${d.pa}</div>
+      <div style="font-size:.78rem;color:#888;margin-bottom:10px;">No. Pekerja: ${d.no}</div>
+      <div style="margin-bottom:6px;">
+        <span style="background:var(--biru);color:#fff;padding:5px 22px;
+                     border-radius:20px;font-size:.9rem;font-weight:700;">${d.kat}</span>
+      </div>
+      <div style="font-size:.8rem;color:#555;margin-bottom:12px;">${d.jab}</div>
+      <div style="font-size:.75rem;color:#aaa;margin-bottom:18px;">${d.undi} undi diterima</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:.78rem;color:#555;">
+        <div style="text-align:left;">
+          <strong>Sesi:</strong> Anugerah PA PTSS 2025<br>
+          <strong>Tarikh:</strong> 30 Jun 2025
+        </div>
+        <div style="text-align:center;width:175px;">
+          <div style="border-bottom:1px solid #333;height:34px;"></div>
+          <div style="font-weight:700;">Penyelaras PPAP</div>
+          <div style="font-size:.7rem;color:#888;">Politeknik Sultan Salahuddin Abdul Aziz Shah</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════════════
+   CARTA DASHBOARD
+════════════════════════════════════ */
+function initCharts() {
+  const B='#003087',G='#C9A84C',H='#2d8a4e',K='#adb5bd';
+  new Chart(document.getElementById('cKategori'),{
+    type:'bar',
+    data:{labels:['PA Paling Prihatin','PA Paling Berdedikasi','PA Paling Inovatif','PA Pilihan Pelajar'],
+          datasets:[{label:'Undi',data:[1102,987,876,927],backgroundColor:[B,G,H,'#e05c2a'],borderRadius:6}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
+  new Chart(document.getElementById('cPenyertaan'),{
+    type:'doughnut',
+    data:{labels:['Sudah Undi','Belum Undi'],datasets:[{data:[876,372],backgroundColor:[H,K],borderWidth:0}]},
+    options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
+  });
+  new Chart(document.getElementById('cJabatan'),{
+    type:'bar',
+    data:{labels:['JRKV','JTMK','JP','JPH','JKE','JKM','ASASI'],
+          datasets:[{label:'Undi',data:[612,734,523,489,678,445,411],backgroundColor:B,borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}
+  });
+}
+
+/* ════════════════════════════════════
+   COUNTDOWN (UI sahaja)
+════════════════════════════════════ */
+function updateCountdown() {
+  const end = new Date('2025-06-30T23:59:59');
+  const now = new Date();
+  const diff = end - now;
+  if (diff <= 0) { document.getElementById('countdown').textContent = 'Sesi tamat'; return; }
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor((diff%86400000)/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  document.getElementById('countdown').textContent = `${d} hari ${h} jam ${m} min lagi`;
+}
+setInterval(updateCountdown, 60000);
+updateCountdown();
+
+/* ════════════════════════════════════
+   TOAST
+════════════════════════════════════ */
+function toast(msg, icon='check-circle-fill') {
+  const tc = document.getElementById('tc');
+  const el = document.createElement('div');
+  el.className = 'toast-msg';
+  el.innerHTML = `<i class="bi bi-${icon} fs-5 flex-shrink-0"></i><span>${msg}</span>`;
+  tc.appendChild(el);
+  setTimeout(() => { el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }, 4000);
+}
+
+/* INIT */
+goScreen('login');
+</script>
+</body>
+</html>
